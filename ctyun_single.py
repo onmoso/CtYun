@@ -51,7 +51,7 @@ class LoginInfo:
 # ---------- HTTP API ----------
 class CtYunApi:
     def __init__(self, login: LoginInfo):
-        self.login = login
+        self.login_info = login
         self.session = requests.Session()
         self.session.headers.update(
             {
@@ -65,10 +65,10 @@ class CtYunApi:
 
     def _signed_headers(self) -> Dict[str, str]:
         now_ms = str(int(time.time() * 1000))
-        sign_str = f"{self.login.device_type}{now_ms}{self.login.tenant_id}{now_ms}{self.login.user_id}{self.login.version}{self.login.secret_key}"
+        sign_str = f"{self.login_info.device_type}{now_ms}{self.login_info.tenant_id}{now_ms}{self.login_info.user_id}{self.login_info.version}{self.login_info.secret_key}"
         return {
-            "ctg-userid": str(self.login.user_id or ""),
-            "ctg-tenantid": str(self.login.tenant_id or ""),
+            "ctg-userid": str(self.login_info.user_id or ""),
+            "ctg-tenantid": str(self.login_info.tenant_id or ""),
             "ctg-timestamp": now_ms,
             "ctg-requestid": now_ms,
             "ctg-signaturestr": md5_hex(sign_str),
@@ -77,7 +77,7 @@ class CtYunApi:
     def _captcha(self) -> str:
         try:
             print("正在识别验证码.")
-            url = f"{BASE}/api/auth/client/captcha?height=36&width=85&userInfo={self.login.user_phone}&mode=auto&_t={int(time.time()*1000)}"
+            url = f"{BASE}/api/auth/client/captcha?height=36&width=85&userInfo={self.login_info.user_phone}&mode=auto&_t={int(time.time()*1000)}"
             img = self.session.get(url, timeout=20).content
             resp = requests.post(OCR_ENDPOINT, files={"image": ("captcha.jpg", img)}, timeout=20)
             resp.raise_for_status()
@@ -89,30 +89,30 @@ class CtYunApi:
             print(f"验证码获取识别错误：{e}")
             return ""
 
-    def login(self) -> bool:
+    def login_async(self) -> bool:
         code = self._captcha()
         form = {
-            "userAccount": self.login.user_phone,
-            "password": self.login.password,
-            "sha256Password": self.login.password,
+            "userAccount": self.login_info.user_phone,
+            "password": self.login_info.password,
+            "sha256Password": self.login_info.password,
             "captchaCode": code,
-            "deviceCode": self.login.device_code,
+            "deviceCode": self.login_info.device_code,
             "deviceName": "Chrome浏览器",
-            "deviceType": self.login.device_type,
+            "deviceType": self.login_info.device_type,
             "deviceModel": "Windows NT 10.0; Win64; x64",
             "appVersion": "2.7.0",
             "sysVersion": "Windows NT 10.0; Win64; x64",
-            "clientVersion": self.login.version,
+            "clientVersion": self.login_info.version,
         }
         r = self.session.post(f"{BASE}/api/auth/client/login", data=form, timeout=30)
         r.raise_for_status()
         j = r.json()
         data = j.get("data", {}) if isinstance(j, dict) else {}
         if isinstance(data, dict) and "secretKey" in data:
-            self.login.secret_key = data.get("secretKey")
-            self.login.user_account = data.get("userAccount")
-            self.login.user_id = data.get("userId")
-            self.login.tenant_id = data.get("tenantId")
+            self.login_info.secret_key = data.get("secretKey")
+            self.login_info.user_account = data.get("userAccount")
+            self.login_info.user_id = data.get("userId")
+            self.login_info.tenant_id = data.get("tenantId")
             print("登录成功.")
             return True
         else:
@@ -133,20 +133,20 @@ class CtYunApi:
 
     def connect(self) -> str:
         form = {
-            "objId": self.login.desktop_id,
+            "objId": self.login_info.desktop_id,
             "objType": "0",
             "osType": "15",
             "deviceId": "60",
             "vdCommand": "",
             "ipAddress": "",
             "macAddress": "",
-            "deviceCode": self.login.device_code,
+            "deviceCode": self.login_info.device_code,
             "deviceName": "Chrome浏览器",
-            "deviceType": self.login.device_type,
+            "deviceType": self.login_info.device_type,
             "deviceModel": "Windows NT 10.0; Win64; x64",
             "appVersion": "2.7.0",
             "sysVersion": "Windows NT 10.0; Win64; x64",
-            "clientVersion": self.login.version,
+            "clientVersion": self.login_info.version,
         }
         h = self._signed_headers()
         r = self.session.post(f"{BASE}/api/desktop/client/connect", data=form, headers=h, timeout=30)
@@ -592,7 +592,7 @@ def main() -> None:
     if not connect_text or '"desktopInfo":null' in connect_text:
         api = CtYunApi(t)
         for i in range(3):
-            if not api.login():
+            if not api.login_async():
                 print(f"重试第{i+1}次。")
                 continue
             t.desktop_id = api.client_list()
