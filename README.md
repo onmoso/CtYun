@@ -58,4 +58,47 @@ python -m python_ctyun.cli
 - 首次登录需要进行验证码识别（自动调用 OCR 接口），登录成功会保存缓存。
 - 连接成功后，日志中出现“发送保活消息成功。”即表示握手和保活正常。
 
+### 云函数/Serverless 使用
+
+Python 版本可在云函数环境（AWS Lambda、阿里云函数计算、腾讯云 SCF、GCP Cloud Functions）中运行：
+
+1) 打包依赖（示例以层或自带依赖方式部署）
+
+```
+cd python_ctyun
+pip install -r requirements.txt -t ./package
+cp -r python_ctyun ./package/
+cd package && zip -r ../ctyun_fn.zip .
+```
+
+2) 入口函数
+
+```
+python_ctyun.serverless.handler
+```
+
+3) 事件输入（JSON）：
+
+```
+{
+  "user": "你的账号",
+  "password": "你的明文密码",
+  "loadCache": true
+}
+```
+
+也可通过环境变量 `APP_USER`、`APP_PASSWORD`、`LOAD_CACHE=1` 传入。
+
+函数执行会在 ~10 秒内完成一次握手与保活应答，并返回：
+
+```
+{
+  "ok": true,
+  "sentKeepalive": true,
+  "desktopId": "xxxx"
+}
+```
+
+注意：云函数通常有冷启动与超时限制，示例实现将 WebSocket 交互控制在短时窗口内，便于集成定时触发或健康检查。
+
 
