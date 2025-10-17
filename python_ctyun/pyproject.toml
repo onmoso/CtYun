@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-ctyun"
+version = "0.1.0"
+description = "Python client for CtYun desktop connect"
+authors = [{name = "AutoPort", email = "noreply@example.com"}]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "requests>=2.32.0",
+  "websocket-client>=1.7.0",
+  "pydantic>=2.8.0",
+  "cryptography>=42.0.0"
+]
+
+[project.scripts]
+ctyun = "python_ctyun.cli:main"
