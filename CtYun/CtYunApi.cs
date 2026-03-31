@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace CtYun
 {
-    internal class CtYunApi
+    internal class CtYunApi : IDisposable
     {
 
         private const string orcUrl = "https://orc.1999111.xyz/ocr";
@@ -24,12 +24,14 @@ namespace CtYun
         private string _deviceCode;
 
         private readonly HttpClient client;
+        private readonly HttpClientHandler handler;
+        private bool disposed = false;
 
         public LoginInfo LoginInfo { get; set; }
         public CtYunApi(string deviceCode)
         {
             _deviceCode = deviceCode;
-            var handler = new HttpClientHandler();
+            handler = new HttpClientHandler();
             client = new HttpClient(handler);
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36");
             client.DefaultRequestHeaders.Add("ctg-devicetype", deviceType);
@@ -292,6 +294,24 @@ namespace CtYun
             using SHA256 sha256 = SHA256.Create();
             byte[] hash = sha256.ComputeHash(bytes);
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    client?.Dispose();
+                    handler?.Dispose();
+                }
+                disposed = true;
+            }
         }
 
     }
