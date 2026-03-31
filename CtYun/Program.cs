@@ -38,7 +38,6 @@ var activeDesktops = new List<Desktop>();
 var checkTasks = desktopList.Select(async d =>
 {
     Utility.WriteLine(ConsoleColor.Red, $"检查云电脑状态: [{d.DesktopCode}] [{d.UseStatusText}]");
-    logs["d.DesktopCode"] = ("PC-01", d.UseStatusText);
     var connectResult = await cyApi.ConnectAsync(d.DesktopId);
     
     // 重试10次
@@ -58,7 +57,6 @@ var checkTasks = desktopList.Select(async d =>
     if (connectResult.Success && connectResult.Data.DesktopInfo != null)
     {
         Utility.WriteLine(ConsoleColor.Red, $"可保活云电脑: [{d.DesktopCode}]");
-        logs["d.DesktopCode"] = ("PC-01", d.UseStatusText);
         d.DesktopInfo = connectResult.Data.DesktopInfo;
         lock (activeDesktops)  // 线程安全添加
         {
