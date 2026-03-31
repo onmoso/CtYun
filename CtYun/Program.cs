@@ -30,33 +30,44 @@ if (!await PerformLoginSequence(cyApi, userPhone, password)) return;
 
 var desktopList = await cyApi.GetLlientListAsync();
 var activeDesktops = new List<Desktop>();
-foreach (var d in desktopList)
+// 所有云电脑同时启动检查（真正的并发）
+var tasks = desktopList.Select(async d =>
 {
     Utility.WriteLine(ConsoleColor.Red, $"检查云电脑状态: [{d.DesktopCode}] [{d.UseStatusText}]");
+    
     var connectResult = await cyApi.ConnectAsync(d.DesktopId);
+    
+    // 重试10次
     if (connectResult.Success && connectResult.Data.DesktopInfo == null)
     {
         for (int i = 0; i < 10; i++)
         {
-            await Task.Delay(20*1000);
+            await Task.Delay(20 * 1000);
             connectResult = await cyApi.ConnectAsync(d.DesktopId);
+            
             if (connectResult.Data.DesktopInfo != null)
-            {
                 break;
-            }
         }
     }
+    
+    // 直接处理结果（在各自任务里处理，避免二次循环）
     if (connectResult.Success && connectResult.Data.DesktopInfo != null)
     {
         Utility.WriteLine(ConsoleColor.Red, $"可保活云电脑: [{d.DesktopCode}]");
         d.DesktopInfo = connectResult.Data.DesktopInfo;
-        activeDesktops.Add(d);
+        lock (activeDesktops)  // 线程安全添加
+        {
+            activeDesktops.Add(d);
+        }
     }
     else
     {
         Utility.WriteLine(ConsoleColor.Red, $"云电脑异常: [{d.DesktopId}] {connectResult.Msg}");
     }
-}
+});
+
+// 等待所有任务完成
+await Task.WhenAll(tasks);
 
 if (activeDesktops.Count == 0) return;
 
