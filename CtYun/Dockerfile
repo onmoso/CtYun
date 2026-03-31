@@ -7,6 +7,11 @@ WORKDIR /app
 # 将构建好的发布文件复制到容器中
 COPY ./publish/ ./
 
+ENV TZ=Asia/Shanghai
+ENV DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION=1
+ENV FORCE_COLOR=1
+ENV TERM=xterm-256color
+
 ENV APP_USER=defaultuser \
     APP_PASSWORD=defaultpass
 
