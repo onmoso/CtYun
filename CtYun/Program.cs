@@ -32,11 +32,23 @@ var desktopList = await cyApi.GetLlientListAsync();
 var activeDesktops = new List<Desktop>();
 foreach (var d in desktopList)
 {
-    Utility.WriteLine(ConsoleColor.Red, $"[{d.DesktopCode}] [{d.UseStatusText}]-检查云电脑状态");
+    Utility.WriteLine(ConsoleColor.Red, $"检查云电脑状态: [{d.DesktopCode}] [{d.UseStatusText}]");
     var connectResult = await cyApi.ConnectAsync(d.DesktopId);
+    if (connectResult.Success && connectResult.Data.DesktopInfo == null)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            await Task.Delay(20*1000);
+            connectResult = await cyApi.ConnectAsync(d.DesktopId);
+            if (connectResult.Data.DesktopInfo != null)
+            {
+                break;
+            }
+        }
+    }
     if (connectResult.Success && connectResult.Data.DesktopInfo != null)
     {
-        Utility.WriteLine(ConsoleColor.Red, $"[{d.DesktopCode}]-可保活云电脑");
+        Utility.WriteLine(ConsoleColor.Red, $"可保活云电脑: [{d.DesktopCode}]");
         d.DesktopInfo = connectResult.Data.DesktopInfo;
         activeDesktops.Add(d);
     }
