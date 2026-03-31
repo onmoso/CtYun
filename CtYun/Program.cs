@@ -33,24 +33,27 @@ if (!await PerformLoginSequence(cyApi, userPhone, password)) return;
 var desktopList = await cyApi.GetLlientListAsync();
 var activeDesktops = new List<Desktop>();
 
-
 var logs = new ConcurrentDictionary<string, (string Code, string Status)>();
+
+// 启动实时显示（自动清屏刷新，无需手动处理）
 var showTask = AnsiConsole.Live(new Table())
     .StartAsync(async ctx =>
     {
         while (true)
         {
-            // 生成表格
             var table = new Table()
                 .AddColumn("云电脑名称")
                 .AddColumn("状态")
                 .AddColumn("云电脑ID");
 
-            foreach (var (id, (code, status)) in logs)
+            foreach (var (id, (code, status)) in logs.OrderBy(x => x.Key))
             {
-                var color = status == "已开机" ? "green" 
-                          : status == "已关机" ? "red" 
-                          : "yellow";
+                var color = status switch
+                {
+                    "已开机" => "green",
+                    "已关机" => "red",
+                    _ => "yellow"
+                };
                 table.AddRow(code, $"[{color}]{status}[/]", id);
             }
 
