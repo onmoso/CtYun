@@ -57,14 +57,9 @@ jobs:
       with:
         driver: docker-container
 
-    # 构建和推送多架构 Docker 镜像
-    - name: Build and Push Multi-Arch Docker Image
-      run: |
-        docker buildx build \
-          --no-cache \
-          --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.DOCKER_USERNAME }}/ctyun:${{ env.version }} \
-          -t ${{ secrets.DOCKER_USERNAME }}/ctyun:latest \
-          -f ./CtYun/Dockerfile \
-          --push .
+    - name: Build Docker Image
+      run: docker build -t docker.cnb.cool/ace/docker/ctyun:latest -f ./CtYun/Dockerfile .
+
+    - name: Push Docker Image
+      run: docker push docker.cnb.cool/ace/docker/ctyun:latest
 
