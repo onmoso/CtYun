@@ -32,15 +32,9 @@ var desktopList = await cyApi.GetLlientListAsync();
 var activeDesktops = new List<Desktop>();
 foreach (var d in desktopList)
 {
-    if (d.UseStatusText!= "运行中")
-    {
-        Utility.WriteLine(ConsoleColor.Red, $"[{d.DesktopCode}] [{d.UseStatusText}]电脑未开机，正在开机，请在2分钟后重新运行软件");
-    }
     Utility.WriteLine(ConsoleColor.Red, $"[{d.DesktopCode}] [{d.UseStatusText}]");
     var connectResult = await cyApi.ConnectAsync(d.DesktopId);
-    Utility.WriteLine(ConsoleColor.Red, connectResult);
-    Utility.WriteLine(ConsoleColor.Red, connectResult.Success);
-    Utility.WriteLine(ConsoleColor.Red, connectResult.Data);
+    Utility.WriteLine(ConsoleColor.Red, $"[{d.DesktopCode}] [{connectResult.Data.DesktopInfo}]");
     if (connectResult.Success && connectResult.Data.DesktopInfo != null)
     {
         d.DesktopInfo = connectResult.Data.DesktopInfo;
@@ -48,7 +42,7 @@ foreach (var d in desktopList)
     }
     else
     {
-        Utility.WriteLine(ConsoleColor.Red, $"Connect Error: [{d.DesktopId}] {connectResult.Msg}");
+        Utility.WriteLine(ConsoleColor.Red, $"云电脑异常: [{d.DesktopId}] {connectResult.Msg}");
     }
 }
 
