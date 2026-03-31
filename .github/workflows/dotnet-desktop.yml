@@ -47,7 +47,8 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
+        registry: cnb docker.cnb.cool
+        username: cnb
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     # 设置 Buildx
