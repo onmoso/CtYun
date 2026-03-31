@@ -31,7 +31,7 @@ if (!await PerformLoginSequence(cyApi, userPhone, password)) return;
 var desktopList = await cyApi.GetLlientListAsync();
 var activeDesktops = new List<Desktop>();
 // 所有云电脑同时启动检查（真正的并发）
-var tasks = desktopList.Select(async d =>
+var checkTasks = desktopList.Select(async d =>
 {
     Utility.WriteLine(ConsoleColor.Red, $"检查云电脑状态: [{d.DesktopCode}] [{d.UseStatusText}]");
     
@@ -67,7 +67,7 @@ var tasks = desktopList.Select(async d =>
 });
 
 // 等待所有任务完成
-await Task.WhenAll(tasks);
+await Task.WhenAll(checkTasks);
 
 if (activeDesktops.Count == 0) return;
 
