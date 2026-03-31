@@ -8,7 +8,9 @@
 		<PublishAot>true</PublishAot>
 		<FileVersion>1.1.4</FileVersion>
 		<AssemblyVersion>1.1.4</AssemblyVersion>
-        <PackageReference Include="Spectre.Console" Version="0.49.1" />
 	</PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Spectre.Console" Version="0.49.1" />
+    </ItemGroup>
 
 </Project>
