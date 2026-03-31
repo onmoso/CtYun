@@ -33,39 +33,11 @@ if (!await PerformLoginSequence(cyApi, userPhone, password)) return;
 var desktopList = await cyApi.GetLlientListAsync();
 var activeDesktops = new List<Desktop>();
 
-var logs = new ConcurrentDictionary<string, (string Code, string Status)>();
-
-// 启动实时显示（自动清屏刷新，无需手动处理）
-var showTask = AnsiConsole.Live(new Table())
-    .StartAsync(async ctx =>
-    {
-        while (true)
-        {
-            var table = new Table()
-                .AddColumn("云电脑名称")
-                .AddColumn("状态")
-                .AddColumn("云电脑ID");
-
-            foreach (var (id, (code, status)) in logs.OrderBy(x => x.Key))
-            {
-                var color = status switch
-                {
-                    "已开机" => "green",
-                    "已关机" => "red",
-                    _ => "yellow"
-                };
-                table.AddRow(code, $"[{color}]{status}[/]", id);
-            }
-
-            ctx.UpdateTarget(table);
-            await Task.Delay(1000);
-        }
-    });
 
 // 所有云电脑同时启动检查（真正的并发）
 var checkTasks = desktopList.Select(async d =>
 {
-    //Utility.WriteLine(ConsoleColor.Red, $"检查云电脑状态: [{d.DesktopCode}] [{d.UseStatusText}]");
+    Utility.WriteLine(ConsoleColor.Red, $"检查云电脑状态: [{d.DesktopCode}] [{d.UseStatusText}]");
     logs["d.DesktopCode"] = ("PC-01", d.UseStatusText);
     var connectResult = await cyApi.ConnectAsync(d.DesktopId);
     
@@ -85,7 +57,7 @@ var checkTasks = desktopList.Select(async d =>
     // 直接处理结果（在各自任务里处理，避免二次循环）
     if (connectResult.Success && connectResult.Data.DesktopInfo != null)
     {
-        //Utility.WriteLine(ConsoleColor.Red, $"可保活云电脑: [{d.DesktopCode}]");
+        Utility.WriteLine(ConsoleColor.Red, $"可保活云电脑: [{d.DesktopCode}]");
         logs["d.DesktopCode"] = ("PC-01", d.UseStatusText);
         d.DesktopInfo = connectResult.Data.DesktopInfo;
         lock (activeDesktops)  // 线程安全添加
@@ -104,7 +76,7 @@ await Task.WhenAll(checkTasks);
 
 if (activeDesktops.Count == 0) return;
 
-//Utility.WriteLine(ConsoleColor.Yellow, "保活任务启动：每 60 秒强制重连一次。");
+Utility.WriteLine(ConsoleColor.Yellow, "保活任务启动：每 60 秒强制重连一次。");
 
 // 为每台设备开启独立的保活任务
 var tasks = activeDesktops.Select(d => KeepAliveWorkerWithForcedReset(d, globalCts.Token));
