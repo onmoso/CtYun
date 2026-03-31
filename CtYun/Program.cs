@@ -34,7 +34,7 @@ foreach (var d in desktopList)
 {
     Utility.WriteLine(ConsoleColor.Red, $"[{d.DesktopCode}] [{d.UseStatusText}]");
     var connectResult = await cyApi.ConnectAsync(d.DesktopId);
-    Utility.WriteLine(ConsoleColor.Red, $"[{d.DesktopCode}] [{connectResult.Data.DesktopInfo}]");
+    Console.WriteLine(connectResult.Data.DesktopInfo);
     if (connectResult.Success && connectResult.Data.DesktopInfo != null)
     {
         d.DesktopInfo = connectResult.Data.DesktopInfo;
