@@ -17,6 +17,7 @@ namespace CtYun
 
         public byte[] Execute(byte[] key)
         {
+            _buffers.Clear();
             // 第一步：处理数据
             ResolveInboundData(key);
 
@@ -33,7 +34,7 @@ namespace CtYun
         {
             // 现代写法：直接切片，不产生拷贝
             _buffers.Add(data.AsMemory(16));
-            buffers.Clear();
+            
         }
         private (BigInteger N, int E) GetPublicKey()
         {
