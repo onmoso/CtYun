@@ -36,7 +36,9 @@ foreach (var d in desktopList)
     {
         Utility.WriteLine(ConsoleColor.Red, $"[{d.DesktopCode}] [{d.UseStatusText}]电脑未开机，正在开机，请在2分钟后重新运行软件");
     }
+    Utility.WriteLine(d.UseStatusText);
     var connectResult = await cyApi.ConnectAsync(d.DesktopId);
+    Utility.WriteLine(connectResult);
     if (connectResult.Success && connectResult.Data.DesktopInfo != null)
     {
         d.DesktopInfo = connectResult.Data.DesktopInfo;
