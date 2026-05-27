@@ -210,8 +210,8 @@ async Task ReceiveLoop(ClientWebSocket ws, Desktop desktop, CancellationToken ct
                             await ws.SendAsync(byUserName, WebSocketMessageType.Binary, true, ct);
 
                             //发送了就会挤掉其他上线的客户端
-                            var bylogininfo = new SendInfo { type = 112, data = desktop.DesktopInfo.tobuffer(deviceCode) }.tobuffer(false);
-                            await ws.SendAsync(bylogininfo, WebSocketMessageType.binary, true, ct);
+                            var bylogininfo = new SendInfo { type = 112, data = desktop.DesktopInfo.ToBuffer(deviceCode) }.ToBuffer(false);
+                            await ws.SendAsync(bylogininfo, WebSocketMessageType.Binary, true, ct);
 
                             var byClinkVersion = new SendInfo { Type = 116 }.ToBuffer(false);
                             await ws.SendAsync(byClinkVersion, WebSocketMessageType.Binary, true, ct);
