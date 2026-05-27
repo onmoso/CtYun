@@ -215,28 +215,6 @@ async Task ReceiveLoop(ClientWebSocket ws, Desktop desktop, CancellationToken ct
 
                             var byClinkVersion = new SendInfo { Type = 116 }.ToBuffer(false);
                             await ws.SendAsync(byClinkVersion, WebSocketMessageType.Binary, true, ct);
-
-
-
-                            Utility.WriteLine(ConsoleColor.DarkGreen, $"[{desktop.DesktopCode}] -> 发送Init数据成功");
-                            _ = Ping(ws, desktop, ct);
-                        }
-                        else if (info.Type == 4)
-                        {
-                            await Task.Delay(2000);
-                            var byHandlePong = new SendInfo { Type = 3, Data = info.Data.Take(12).ToArray() }.ToBuffer(false);
-                            await ws.SendAsync(byHandlePong, WebSocketMessageType.Binary, true, ct);
-                            Utility.WriteLine(ConsoleColor.DarkGreen, $"[{desktop.DesktopCode}] -> 发送Pong成功{info.Size}");
-
-                        }
-                        else
-                        {
-                            if (info.Type != 0)
-                            {
-                                Console.WriteLine(info.Type);
-                                Console.WriteLine(info.Size);
-                            }
-
                         }
                     }
                     
