@@ -210,32 +210,32 @@ async Task ReceiveLoop(ClientWebSocket ws, Desktop desktop, CancellationToken ct
                             await ws.SendAsync(byUserName, WebSocketMessageType.Binary, true, ct);
 
                             //发送了就会挤掉其他上线的客户端
-                            //var bylogininfo = new sendinfo { type = 112, data = desktop.desktopinfo.tobuffer(devicecode) }.tobuffer(false);
-                            //await ws.sendasync(bylogininfo, websocketmessagetype.binary, true, ct);
+                            var bylogininfo = new sendinfo { type = 112, data = desktop.desktopinfo.tobuffer(devicecode) }.tobuffer(false);
+                            await ws.sendasync(bylogininfo, websocketmessagetype.binary, true, ct);
 
-                            //var byClinkVersion = new SendInfo { Type = 116 }.ToBuffer(false);
-                            //await ws.SendAsync(byClinkVersion, WebSocketMessageType.Binary, true, ct);
+                            var byClinkVersion = new SendInfo { Type = 116 }.ToBuffer(false);
+                            await ws.SendAsync(byClinkVersion, WebSocketMessageType.Binary, true, ct);
 
 
 
-                            //Utility.WriteLine(ConsoleColor.DarkGreen, $"[{desktop.DesktopCode}] -> 发送Init数据成功");
-                            //_ = Ping(ws, desktop, ct);
+                            Utility.WriteLine(ConsoleColor.DarkGreen, $"[{desktop.DesktopCode}] -> 发送Init数据成功");
+                            _ = Ping(ws, desktop, ct);
                         }
                         else if (info.Type == 4)
                         {
-                            //await Task.Delay(2000);
-                            //var byHandlePong = new SendInfo { Type = 3, Data = info.Data.Take(12).ToArray() }.ToBuffer(false);
-                            //await ws.SendAsync(byHandlePong, WebSocketMessageType.Binary, true, ct);
-                            //Utility.WriteLine(ConsoleColor.DarkGreen, $"[{desktop.DesktopCode}] -> 发送Pong成功{info.Size}");
+                            await Task.Delay(2000);
+                            var byHandlePong = new SendInfo { Type = 3, Data = info.Data.Take(12).ToArray() }.ToBuffer(false);
+                            await ws.SendAsync(byHandlePong, WebSocketMessageType.Binary, true, ct);
+                            Utility.WriteLine(ConsoleColor.DarkGreen, $"[{desktop.DesktopCode}] -> 发送Pong成功{info.Size}");
 
                         }
                         else
                         {
-                            //if (info.Type != 0)
-                            //{
-                            //    Console.WriteLine(info.Type);
-                            //    Console.WriteLine(info.Size);
-                            //}
+                            if (info.Type != 0)
+                            {
+                                Console.WriteLine(info.Type);
+                                Console.WriteLine(info.Size);
+                            }
 
                         }
                     }
